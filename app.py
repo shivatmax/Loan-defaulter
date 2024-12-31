@@ -1,8 +1,15 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from flask import Flask, request, jsonify, render_template
 import joblib
 import pandas as pd
 import numpy as np
+from catboost import CatBoostClassifier
+
+# Initialize the Flask app
+app = Flask(__name__)
+
+# Load the saved model and scaler
+model = joblib.load('loan_default_model_rf.pkl')
+scaler = joblib.load('scaler.pkl')
 
 # Define the feature columns
 feature_cols = [
@@ -18,30 +25,29 @@ feature_cols = [
     'income_bracket_Very High'
 ]
 
-# Load the saved model and scaler
-model = joblib.load('loan_default_model_rf.pkl')
-scaler = joblib.load('scaler.pkl')
+numerical_cols = [
+    'age',
+    'log_cash_incoming_30days',
+    'gps_fix_count',
+    'unique_locations_count',
+    'avg_time_between_opens',
+    'night_usage_ratio',
+    'num_clusters'
+]
 
-# Initialize FastAPI app
-app = FastAPI()
+# Define the home route
+@app.route('/')
+def index():
+    return "Welcome to the Loan Repayment Prediction API!"
 
-# Define the request body using Pydantic
-class UserInput(BaseModel):
-    age: int
-    cash_incoming_30days: float
-    gps_fix_count: int = 0
-    unique_locations_count: int = 0
-    avg_time_between_opens: float = 0.0
-    night_usage_ratio: float = 0.0
-    num_clusters: int = 0
-
-@app.post("/predict")
-def predict_loan_outcome(input_data: UserInput):
-    # Convert input data to a dictionary
-    data = input_data.dict()
+# Define the predict route
+@app.route('/predict', methods=['POST'])
+def predict_loan_outcome():
+    # Get the JSON data from the request
+    input_data = request.get_json(force=True)
     
-    # Create a DataFrame
-    input_df = pd.DataFrame([data])
+    # Convert input data to DataFrame
+    input_df = pd.DataFrame([input_data])
     
     # Preprocessing
     # Log transformation
@@ -72,22 +78,13 @@ def predict_loan_outcome(input_data: UserInput):
     # Fill missing GPS features with zeros if necessary
     gps_feature_cols = ['gps_fix_count', 'unique_locations_count', 'avg_time_between_opens', 'night_usage_ratio', 'num_clusters']
     input_df[gps_feature_cols] = input_df[gps_feature_cols].fillna(0)
-
+    
     # Scale numerical features
-    numerical_cols = [
-        'age',
-        'log_cash_incoming_30days',
-        'gps_fix_count',
-        'unique_locations_count',
-        'avg_time_between_opens',
-        'night_usage_ratio',
-        'num_clusters'
-    ]
     input_df[numerical_cols] = scaler.transform(input_df[numerical_cols])
-
+    
     # Ensure the input_df has all the required columns
     input_df = input_df.reindex(columns=feature_cols, fill_value=0)
-
+    
     # Make prediction
     prediction = model.predict(input_df)
     prediction_proba = model.predict_proba(input_df)
@@ -95,7 +92,8 @@ def predict_loan_outcome(input_data: UserInput):
     outcome = 'Repaid' if prediction[0] == 1 else 'Defaulted'
     proba = prediction_proba[0][prediction[0]]
     
-    return {
-        'prediction': outcome,
-        'probability': float(proba)
-    }
+    # Return the prediction as JSON
+    return jsonify({'prediction': outcome, 'probability': float(proba)})
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=7860)
