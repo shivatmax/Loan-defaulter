@@ -1,4 +1,11 @@
 # Loan Repayment Prediction Project
+Name - SHIV AWASTHI
+
+Location - New Delhi
+
+Phone - +91 8791346998
+
+Email - awasthishiv0987@gmail.com
 
 Google coloab link - https://colab.research.google.com/drive/1wVy-J_ZjWh3KtDNbuAkzmPcdop7dahRn?usp=sharing
 
