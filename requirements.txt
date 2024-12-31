@@ -1,4 +1,6 @@
+numpy==1.26.4
 pandas
-sqlalchemy
-seaborn
-matplotlib
+scikit-learn
+catboost==1.2.7
+streamlit
+joblib
