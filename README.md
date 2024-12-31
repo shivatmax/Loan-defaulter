@@ -9,6 +9,8 @@ Email - awasthishiv0987@gmail.com
 
 Google coloab link - https://colab.research.google.com/drive/1wVy-J_ZjWh3KtDNbuAkzmPcdop7dahRn?usp=sharing
 
+My Linkedin - https://www.linkedin.com/in/shivawasthi/
+
 ## Table of Contents
 
 - [Project Overview](#project-overview)
