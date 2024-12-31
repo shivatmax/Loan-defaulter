@@ -1,5 +1,7 @@
 # Loan Repayment Prediction Project
 
+Google coloab link - https://colab.research.google.com/drive/1wVy-J_ZjWh3KtDNbuAkzmPcdop7dahRn?usp=sharing
+
 ## Table of Contents
 
 - [Project Overview](#project-overview)
